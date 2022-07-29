@@ -41,7 +41,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     func kickBall() {
         ball.physicsBody?.isDynamic = true
-        ball.physicsBody?.applyImpulse(CGVector(dx: 3, dy: 5))
+        ball.physicsBody?.applyImpulse(CGVector(dx: Int.random(in: -5...5), dy: 5))
     }
     
     func updateLabels() {
@@ -129,7 +129,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             let y = Int(frame.maxY) - 65 - (r * 25)
             for i in 0..<count {
                 let x = i * 55 + xOffset
-            makeBrick(x: x, y: y, color: colors[r])
+                makeBrick(x: x, y: y, color: colors[r])
             }
         }
     }
@@ -199,6 +199,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             if contact.bodyA.node == brick ||
                 contact.bodyB.node == brick {
                 score += 1
+                
+                // increase ball velocity by 2%
+                ball.physicsBody!.velocity.dx *= CGFloat(1.02)
+                ball.physicsBody!.velocity.dy *= CGFloat(1.02)
+                
                 updateLabels()
                 if brick.color == .blue {
                     brick.color = .orange // blue bricks turn orange
@@ -215,30 +220,41 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 }
             }
         }
-            if contact.bodyA.node?.name == "loseZone" ||
-                contact.bodyB.node?.name == "loseZone" {
-                lives -= 1
-                if lives > 0 {
-                    score = 0
-                    resetGame()
-                    kickBall()
-                }
-                else {
-                    gameOver(winner: false)
-                }
-            }
-        }
-        
-        func gameOver(winner: Bool) {
-            playingGame = false
-            playLabel.alpha = 1
-            resetGame()
-            if winner {
-                playLabel.text = "You Win! Tap to play again"
+        if contact.bodyA.node?.name == "loseZone" ||
+            contact.bodyB.node?.name == "loseZone" {
+            lives -= 1
+            if lives > 0 {
+                score = 0
+                resetGame()
+                kickBall()
             }
             else {
-                playLabel.text = "You Lose! Tap to play again"
+                gameOver(winner: false)
             }
         }
-        
     }
+    
+    func gameOver(winner: Bool) {
+        playingGame = false
+        playLabel.alpha = 1
+        resetGame()
+        if winner {
+            playLabel.text = "You Win! Tap to play again"
+        }
+        else {
+            playLabel.text = "You Lose! Tap to play again"
+        }
+    }
+    
+    override func update(_ currentTime: TimeInterval) {
+        if abs(ball.physicsBody!.velocity.dx) < 100 {
+            // ball has stalled in x direction, so kick it randomly horizontally
+            ball.physicsBody?.applyImpulse(CGVector(dx: Int.random(in: -3...3), dy: 0))
+        }
+        if abs(ball.physicsBody!.velocity.dy) < 100 {
+            // ball has stalled in y direct, so kick it randomly vertically
+            ball.physicsBody?.applyImpulse(CGVector(dx: 0, dy: Int.random(in: -3...3)))
+        }
+    }
+    
+}
