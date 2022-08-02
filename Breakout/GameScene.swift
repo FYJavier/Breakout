@@ -14,6 +14,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var bricks = [SKSpriteNode]()
     var loseZone = SKSpriteNode()
     var playLabel = SKLabelNode()
+    var planets = SKSpriteNode()
     var livesLabel = SKLabelNode()
     var scoreLabel = SKLabelNode()
     var playingGame = false
@@ -93,7 +94,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     func makePaddle() {
         paddle.removeFromParent() //remove the paddle, if it exists
-        paddle = SKSpriteNode(color: .white, size: CGSize(width: frame.width/4, height: 20))
+        paddle = SKSpriteNode(color: .white, size: CGSize(width: frame.width, height: 20))
         paddle.position = CGPoint(x: frame.midX, y: frame.minY + 125)
         paddle.name = "paddle"
         paddle.physicsBody = SKPhysicsBody(rectangleOf: paddle.size)
@@ -152,12 +153,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         addChild(playLabel)
         
         livesLabel.fontSize = 18
-        livesLabel.fontColor = .black
+        livesLabel.fontColor = .blue
+        livesLabel.fontName = "Arial"
         livesLabel.position = CGPoint(x: frame.minX + 50, y: frame.minY + 18)
         addChild(livesLabel)
         
         scoreLabel.fontSize = 18
-        scoreLabel.fontColor = .black
+        scoreLabel.fontColor = .green
         scoreLabel.fontName = "Arial"
         scoreLabel.position = CGPoint(x: frame.maxX - 50, y: frame.minY + 18)
         addChild(scoreLabel)
@@ -174,7 +176,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                     if node.name == "playLabel" {
                         playingGame = true
                         node.alpha = 0
-                        score = 0
+                        planets.removeFromParent()
+                         score = 0
                         lives = 3
                         updateLabels()
                         kickBall()
@@ -220,6 +223,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 }
             }
         }
+        
         if contact.bodyA.node?.name == "loseZone" ||
             contact.bodyB.node?.name == "loseZone" {
             lives -= 1
@@ -234,11 +238,18 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
     }
     
+    func winPlanets() {
+        planets = SKSpriteNode(texture: SKTexture(imageNamed: "HappyPlanets"))
+        planets.position = CGPoint(x: frame.midX, y: frame.midY + 150)
+        addChild(planets)
+    }
+    
     func gameOver(winner: Bool) {
         playingGame = false
         playLabel.alpha = 1
         resetGame()
         if winner {
+            winPlanets()
             playLabel.text = "You Win! Tap to play again"
         }
         else {
